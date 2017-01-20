@@ -181,7 +181,8 @@ function loginProcess() {
             if (startsWithMH(tablink, "research/collection") || startsWithMH(tablink, "research/record") || (startsWithHTTP(tablink,"http://www.findagrave.com") && !tablink.contains("page=gsr")) ||
                 startsWithHTTP(tablink,"http://www.wikitree.com") || startsWithHTTP(tablink,"http://trees.ancestry.") || startsWithHTTP(tablink,"http://person.ancestry.") || startsWithHTTP(tablink,"http://www.werelate.org/wiki/Person") ||
                 (validRootsWeb(tablink) && tablink.contains("id=")) || (startsWithHTTP(tablink,"http://records.ancestry.com") && tablink.contains("pid=")) || startsWithHTTP(tablink,"http://www.ancestry.com/genealogy/records/") ||
-                startsWithHTTP(tablink,"https://familysearch.org/") || validMyHeritage(tablink) || validFamilyTree(tablink)) {
+                startsWithHTTP(tablink,"https://familysearch.org/") || validMyHeritage(tablink) || validFamilyTree(tablink)
+                || startsWithHTTP(tablink,"http://www.filae.com/")) {
                 document.querySelector('#message').style.display = "none";
                 getPageCode();
             } else if (startsWithMH(tablink, "matchingresult") || (startsWithHTTP(tablink,"http://www.findagrave.com") && tablink.contains("page=gsr")) ||
@@ -631,6 +632,12 @@ function loadPage(request) {
                 }
                 recordtype = "WeRelate Genealogy";
                 focusrange = "";
+            } else if (startsWithHTTP(tablink,"http://www.filae.com")) {
+                var parsed = $(request.source.replace(/<img[^>]*>/ig, ""));
+                var infotable = parsed.find(".informations-fiche-arbre");
+                focusname = infotable.find("h1").text();
+                recordtype = "Filae";
+                focusrange = "";
             }
 
             if (focusid === "" || focusid === "Select from History") {
@@ -738,6 +745,8 @@ function loadPage(request) {
                     parseFamilySearchJSON(request.source, true);
                 } else if (startsWithHTTP(tablink,"https://familysearch.org/platform")) {
                     parseFamilySearchRecord(request.source, true);
+                } else if (startsWithHTTP(tablink,"http://www.filae.com/v4/genealogie")) {
+                    parseFilaeMain(request.source, true);
                 }
 
                 if (!accountinfo.pro) {
@@ -1076,7 +1085,8 @@ function getPageCode() {
             (startsWithHTTP(tablink,"http://person.ancestry.") && (!tablink.endsWith("/story") && !tablink.endsWith("/gallery"))) ||
             (startsWithHTTP(tablink,"http://trees.ancestry.") && !tablink.contains("family?cfpid=") && !isNaN(tablink.slice(-1))) ||
             (startsWithHTTP(tablink,"https://familysearch.org/pal:") && tablink.contains("?view=basic")) ||
-            startsWithHTTP(tablink,"https://familysearch.org/tree-data") || startsWithHTTP(tablink,"https://familysearch.org/platform")) {
+            startsWithHTTP(tablink,"https://familysearch.org/tree-data") || startsWithHTTP(tablink,"https://familysearch.org/platform")||
+            startsWithHTTP(tablink,"http://www.filae.com")) {
             chrome.tabs.executeScript(null, {
                 file: "getPagesSource.js"
             }, function () {
@@ -2223,7 +2233,7 @@ function supportedCollection() {
     } else return tablink.contains("/collection-") || tablink.contains("research/record-") || startsWithHTTP(tablink,"http://www.findagrave.com") ||
         startsWithHTTP(tablink,"http://www.wikitree.com/") || validRootsWeb(tablink) ||
         validAncestry(tablink) || (startsWithHTTP(tablink,"https://familysearch.org/pal:") || startsWithHTTP(tablink,"https://familysearch.org/tree") || startsWithHTTP(tablink,"https://familysearch.org/platform")) ||
-        startsWithHTTP(tablink,"http://www.werelate.org/") || validMyHeritage(tablink) || validFamilyTree(tablink);
+        startsWithHTTP(tablink,"http://www.werelate.org/") || validMyHeritage(tablink) || validFamilyTree(tablink) || startsWithHTTP(tablink,"http://www.filae.com/");
 }
 
 function validAncestry(url) {
